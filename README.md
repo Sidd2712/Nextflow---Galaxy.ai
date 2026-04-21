@@ -50,7 +50,6 @@ Fill in the following in `.env.local`:
 | `DATABASE_URL` | [neon.tech](https://neon.tech) → Create project |
 | `GEMINI_API_KEY` | [aistudio.google.com](https://aistudio.google.com/app/apikey) |
 | `TRIGGER_SECRET_KEY` | [trigger.dev](https://trigger.dev) → Project Settings |
-| `NEXT_PUBLIC_TRIGGER_PUBLIC_API_KEY` | Same Trigger.dev dashboard |
 | `NEXT_PUBLIC_TRANSLOADIT_KEY` | [transloadit.com](https://transloadit.com) → Account |
 | `TRANSLOADIT_SECRET` | Same Transloadit dashboard |
 | `NEXT_PUBLIC_TRANSLOADIT_IMAGE_TEMPLATE_ID` | Create template in Transloadit |
