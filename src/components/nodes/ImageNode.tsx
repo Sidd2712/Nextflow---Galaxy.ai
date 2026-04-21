@@ -20,37 +20,55 @@ export const ImageNode = memo(function ImageNode({ id, data, selected }: NodePro
     setNodeStatus(id, "running");
 
     try {
-      // Get signed params from our API
+      // 1. Get signed params
       const paramsRes = await fetch("/api/upload/params", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ fileType: "image", fileName: file.name, mimeType: file.type }),
       });
-      const { params, signature, key } = await paramsRes.json();
+      const { params, signature } = await paramsRes.json();
 
-      // Build Transloadit form
+      // 2. Build form
       const formData = new FormData();
       formData.append("params", params);
       formData.append("signature", signature);
       formData.append("file", file);
 
+      // 3. START ASSEMBLY
       const assemblyRes = await fetch("https://api2.transloadit.com/assemblies", {
         method: "POST",
         body: formData,
       });
+      
       const assembly = await assemblyRes.json();
 
-      // Poll for completion
+      // --- CRITICAL FIX START ---
+      // If the assembly failed to start, the assembly_id will be missing.
+      if (assembly.error || !assembly.assembly_id) {
+        console.error("Transloadit Start Error:", assembly);
+        // This alert will tell you EXACTLY what is wrong (e.g., "INVALID_AUTH_KEY")
+        alert(`Transloadit Error: ${assembly.message || assembly.error}`);
+        setNodeStatus(id, "error");
+        return; // STOP HERE so we don't fetch "undefined"
+      }
+      // --- CRITICAL FIX END ---
+
+      // 4. Poll for completion
       let final = assembly;
       while (final.ok !== "ASSEMBLY_COMPLETED" && final.ok !== "ASSEMBLY_FAILED") {
         await new Promise((r) => setTimeout(r, 1500));
+        
+        // This is where the "undefined" error was happening
         const poll = await fetch(`https://api2.transloadit.com/assemblies/${assembly.assembly_id}`);
         final = await poll.json();
+        
+        if (final.error) {
+          throw new Error(final.message || "Polling failed");
+        }
       }
 
       if (final.ok !== "ASSEMBLY_COMPLETED") throw new Error("Upload failed");
 
-      // Get the uploaded URL (from first result step)
       const resultSteps = Object.values(final.results ?? {}) as any[][];
       const uploadedUrl = resultSteps[0]?.[0]?.ssl_url ?? resultSteps[0]?.[0]?.url;
 
@@ -63,7 +81,8 @@ export const ImageNode = memo(function ImageNode({ id, data, selected }: NodePro
       });
       setNodeStatus(id, "done", uploadedUrl);
     } catch (err: any) {
-      console.error("Upload error:", err);
+      console.error("Upload error detail:", err);
+      alert(`System Error: ${err.message}`);
       setNodeStatus(id, "error");
     }
   };

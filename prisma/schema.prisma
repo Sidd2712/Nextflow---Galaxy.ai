@@ -20,6 +20,7 @@ model Workflow {
   runs      WorkflowRun[]
 
   @@index([userId])
+  @@map("workflow")
 }
 
 model WorkflowRun {
@@ -36,6 +37,7 @@ model WorkflowRun {
 
   @@index([workflowId])
   @@index([userId])
+  @@map("workflow_run")
 }
 
 model NodeRun {
@@ -55,6 +57,7 @@ model NodeRun {
   workflowRun   WorkflowRun @relation(fields: [workflowRunId], references: [id], onDelete: Cascade)
 
   @@index([workflowRunId])
+  @@map("node_run")
 }
 
 enum RunScope {
