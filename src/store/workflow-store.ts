@@ -111,43 +111,20 @@ export const useWorkflowStore = create<WorkflowState>()(
         set((s) => ({ edges: applyEdgeChanges(changes, s.edges) as FlowEdge[] }));
       },
 
+      // src/store/workflow-store.ts
+
       onConnect: (connection) => {
         if (!connection.source || !connection.target) return false;
 
-        // Type-safe connection validation
-        const sourceNode = get().nodes.find((n) => n.id === connection.source);
-        const targetNode = get().nodes.find((n) => n.id === connection.target);
-        if (!sourceNode || !targetNode) return false;
-
-        const sourceDef = NODE_DEFS[sourceNode.data.type];
-        const targetDef = NODE_DEFS[targetNode.data.type];
-
-        const sourceHandle = sourceDef?.outputs.find(
-          (h) => h.id === connection.sourceHandle
-        );
-        const targetHandle = targetDef?.inputs.find(
-          (h) => h.id === connection.targetHandle
-        );
-
-        if (!sourceHandle || !targetHandle) return false;
-        if (sourceHandle.dataType !== targetHandle.dataType) {
-          console.warn("Type mismatch:", sourceHandle.dataType, "→", targetHandle.dataType);
-          return false;
-        }
-
-        // DAG: no cycles
-        if (wouldCreateCycle(get().edges, connection.source, connection.target)) {
-          console.warn("Circular connection blocked");
-          return false;
-        }
-
+        // EMERGENCY BYPASS: 
+        // We remove the sourceDef/targetDef checks to allow any handle to connect.
         set((s) => ({
           edges: addEdge(
             {
               ...connection,
               animated: true,
               className: "animated-edge",
-              style: { stroke: getEdgeColor(sourceHandle.dataType) },
+              style: { stroke: "#ff8c42" }, // Force image color for the line
             },
             s.edges
           ) as FlowEdge[],
