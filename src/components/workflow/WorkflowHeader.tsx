@@ -111,18 +111,39 @@ export function WorkflowHeader({
       </button>
 
       {/* Run All */}
+      {/* Run All Button */}
       <button
-        onClick={onRunAll}
+        onClick={async () => {
+          console.log("🚀 Run All Clicked!");
+          const { nodes, edges, workflowId } = useWorkflowStore.getState();
+          
+          // Set UI to running
+          useWorkflowStore.setState({ isRunning: true });
+
+          try {
+            const response = await fetch("/api/workflow/run", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ workflowId, nodes, edges }),
+            });
+
+            const data = await response.json();
+            console.log("Server Response:", data);
+            
+            if (!response.ok) throw new Error(data.error || "Failed to trigger");
+
+            alert("Workflow started! Check Trigger.dev dashboard.");
+          } catch (err) {
+            console.error("Execution failed:", err);
+            alert("Error starting workflow. Check console.");
+          } finally {
+            useWorkflowStore.setState({ isRunning: false });
+          }
+        }}
         disabled={isRunning}
-        className="flex items-center gap-1.5 px-3 h-7 rounded-md text-xs font-medium
-          bg-success text-[#0a1a12]
-          hover:brightness-110
-          disabled:opacity-40 disabled:cursor-not-allowed
-          transition-all duration-150"
+        className="flex items-center gap-1.5 px-3 h-7 rounded-md text-xs font-medium bg-success text-[#0a1a12] hover:brightness-110 disabled:opacity-40"
       >
-        {isRunning
-          ? <Loader2 size={13} className="animate-spin" />
-          : <Play size={13} />}
+        {isRunning ? <Loader2 size={13} className="animate-spin" /> : <Play size={13} />}
         {isRunning ? "Running…" : "Run All"}
       </button>
 
