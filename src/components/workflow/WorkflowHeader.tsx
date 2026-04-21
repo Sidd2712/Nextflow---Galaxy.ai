@@ -119,7 +119,7 @@ export function WorkflowHeader({
           useWorkflowStore.setState({ isRunning: true });
 
           try {
-            const response = await fetch("/api/workflow/run", {
+            const response = await fetch("/api/run/execute", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ workflowId, nodes, edges }),
