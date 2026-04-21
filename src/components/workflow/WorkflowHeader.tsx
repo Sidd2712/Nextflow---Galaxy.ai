@@ -136,8 +136,11 @@ export function WorkflowHeader({
 
             if (!response.ok) {
               const errorData = await response.json();
-              console.error("Validation Error:", errorData);
-              alert("Failed to start: " + JSON.stringify(errorData.error.fieldErrors));
+              console.log("FULL ERROR OBJECT:", errorData); // Look at this in the console!
+              
+              // This will show you exactly which field (workflowId, nodes, edges, etc.) is failing
+              const message = JSON.stringify(errorData.error.fieldErrors || errorData.error);
+              alert("Validation Failed: " + message);
               return;
             }
 
