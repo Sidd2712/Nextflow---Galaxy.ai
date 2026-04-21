@@ -134,7 +134,7 @@ export const ImageNode = memo(function ImageNode({ id, data, selected }: NodePro
       {/* Output handle */}
       <div className="flex justify-end items-center gap-1.5 pt-0.5">
         <span className="font-mono text-[10px] text-text-3">image_url</span>
-        <Handle type="source" position={Position.Right} id="output"
+        <Handle type="source" position={Position.Right} id="image_url"
           style={{ background: "#0c0c0f", border: "2px solid #ff8c42", right: -18 }} />
       </div>
     </BaseNode>
