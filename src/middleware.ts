@@ -1,9 +1,9 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
-// Only protect the dashboard UI, let the API handles its own auth or be public for the demo
 const isProtectedRoute = createRouteMatcher([
-  "/workflow(.*)", 
-  // Removed /api/workflow from here to prevent the HTML redirect loop
+  "/workflow(.*)",
+  "/api/workflow(.*)",
+  "/api/run(.*)",
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
