@@ -116,8 +116,6 @@ export function WorkflowHeader({
         onClick={async () => {
           console.log("🚀 Run All Clicked!");
           const { nodes, edges, workflowId } = useWorkflowStore.getState();
-          
-          // Set UI to running
           useWorkflowStore.setState({ isRunning: true });
 
           try {
@@ -127,15 +125,20 @@ export function WorkflowHeader({
               body: JSON.stringify({ workflowId, nodes, edges }),
             });
 
-            const data = await response.json();
-            console.log("Server Response:", data);
-            
-            if (!response.ok) throw new Error(data.error || "Failed to trigger");
+            // CHECK 1: If it's not a 'success' status code
+            if (!response.ok) {
+              const errorHtml = await response.text();
+              console.error("SERVER ERROR HTML DETECTED:");
+              console.log(errorHtml); // <--- READ THIS IN YOUR CONSOLE
+              alert(`Server Error ${response.status}: See console for details.`);
+              return;
+            }
 
-            alert("Workflow started! Check Trigger.dev dashboard.");
+            // CHECK 2: Try to parse JSON only if response was OK
+            const data = await response.json();
+            console.log("Success:", data);
           } catch (err) {
             console.error("Execution failed:", err);
-            alert("Error starting workflow. Check console.");
           } finally {
             useWorkflowStore.setState({ isRunning: false });
           }
