@@ -116,27 +116,35 @@ export function WorkflowHeader({
         onClick={async () => {
           console.log("🚀 Run All Clicked!");
           const { nodes, edges, workflowId } = useWorkflowStore.getState();
+          
+          // Set UI to running
           useWorkflowStore.setState({ isRunning: true });
 
           try {
             const response = await fetch("/api/run/execute", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ workflowId, nodes, edges }),
+              body: JSON.stringify({ 
+                workflowId, 
+                nodes, 
+                edges,
+                // ADD THESE TWO LINES:
+                nodeIds: nodes.map((n) => n.id), 
+                scope: "ALL" 
+              }),
             });
 
-            // CHECK 1: If it's not a 'success' status code
             if (!response.ok) {
-              const errorHtml = await response.text();
-              console.error("SERVER ERROR HTML DETECTED:");
-              console.log(errorHtml); // <--- READ THIS IN YOUR CONSOLE
-              alert(`Server Error ${response.status}: See console for details.`);
+              const errorData = await response.json();
+              console.error("Validation Error:", errorData);
+              alert("Failed to start: " + JSON.stringify(errorData.error.fieldErrors));
               return;
             }
 
-            // CHECK 2: Try to parse JSON only if response was OK
             const data = await response.json();
             console.log("Success:", data);
+            alert("Workflow is now running! Check Trigger.dev.");
+            
           } catch (err) {
             console.error("Execution failed:", err);
           } finally {
